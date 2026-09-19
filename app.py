@@ -8,7 +8,7 @@ SYSTEM_ID="UNG-NEMESIS"; LEGACY_ID="UNG-BCM"; VERSION="0.3.2"
 app=FastAPI(title=SYSTEM_ID,version=VERSION,description="National Emergency Management System")
 @app.on_event("startup")
 def startup(): init_db()
-class IncidentIn(BaseModel): title:str; severity:str
+class IncidentIn(BaseModel): title:str; severity:str; location:str|None=None; latitude:float|None=None; longitude:float|None=None
 class MilitarySupportIn(BaseModel): incident_id:str; support_type:str; reason:str; location:str|None=None
 class MilitarySupportUpdate(BaseModel): status:str; note:str|None=None
 def auth(p,h):
@@ -30,7 +30,7 @@ def incidents(x_ung_permissions:str|None=Header(None)): auth("nemesis.incidents.
 @app.post("/v1/incidents",status_code=201)
 def declare(body:IncidentIn,x_ung_permissions:str|None=Header(None),x_ung_actor:str|None=Header(None)):
  auth("nemesis.incidents.declare",x_ung_permissions)
- try:return declare_incident(body.title,body.severity,actor(x_ung_actor))
+ try:return declare_incident(body.title,body.severity,actor(x_ung_actor),body.location,body.latitude,body.longitude)
  except ValueError as e:raise HTTPException(400,str(e))
 @app.get("/v1/executive/summary")
 def exec_summary(x_ung_permissions:str|None=Header(None)): auth("nemesis.executive.read",x_ung_permissions); return executive_summary()
