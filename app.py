@@ -1,8 +1,9 @@
 from fastapi import FastAPI,Header,HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from domain import declare_incident,list_incidents,executive_summary,request_military_support,list_military_support,update_military_support,audit_log
 from integration import dependencies
-SYSTEM_ID="UNG-NEMESIS"; LEGACY_ID="UNG-BCM"; VERSION="0.3.0"
+SYSTEM_ID="UNG-NEMESIS"; LEGACY_ID="UNG-BCM"; VERSION="0.3.1"
 app=FastAPI(title=SYSTEM_ID,version=VERSION,description="National Emergency Management System")
 class IncidentIn(BaseModel): title:str; severity:str
 class MilitarySupportIn(BaseModel): incident_id:str; support_type:str; reason:str; location:str|None=None
@@ -11,8 +12,10 @@ def auth(p,h):
  s={x.strip() for x in (h or "").split(",") if x.strip()}
  if p not in s and "ung.admin" not in s: raise HTTPException(403,"UNG-JANUS permission required")
 def actor(h): return (h or "unknown").strip()[:160] or "unknown"
-@app.get("/")
-def root(): return {"system":SYSTEM_ID,"legacy_id":LEGACY_ID,"name":"National Emergency Management System","status":"online","version":VERSION}
+@app.get("/",include_in_schema=False)
+def root(): return FileResponse("ui/index.html",media_type="text/html")
+@app.get("/api")
+def api_root(): return {"system":SYSTEM_ID,"legacy_id":LEGACY_ID,"name":"National Emergency Management System","status":"online","version":VERSION}
 @app.get("/health")
 def health(): return {"status":"ok","service":SYSTEM_ID,"version":VERSION}
 @app.get("/ready")
