@@ -8,10 +8,10 @@ def _audit_event(action,actor,resource_id,detail=None):
     e={"id":str(uuid4()),"record_type":"audit","action":action,"actor":actor,"resource_id":resource_id,"at":_now(),"detail":detail or {}}
     put(e); enqueue({"event_type":action,"source":"UNG-NEMESIS","data":e}); return e
 
-def declare_incident(title,severity,actor="unknown"):
+def declare_incident(title,severity,actor="unknown",location=None,latitude=None,longitude=None):
     if not title.strip(): raise ValueError("title_required")
     if severity not in {"low","moderate","high","critical"}: raise ValueError("invalid_severity")
-    r={"id":str(uuid4()),"record_type":"incident","title":title.strip(),"severity":severity,"status":"open","created_at":_now(),"created_by":actor}
+    r={"id":str(uuid4()),"record_type":"incident","title":title.strip(),"severity":severity,"status":"open","created_at":_now(),"created_by":actor,"location":location,"latitude":latitude,"longitude":longitude}
     put(r); _audit_event("incident.declared",actor,r["id"],{"severity":severity}); return r
 def list_incidents(): return _records("incident")
 
