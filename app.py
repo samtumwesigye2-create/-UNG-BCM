@@ -2,7 +2,7 @@ from fastapi import FastAPI,Header,HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from domain import declare_incident,list_incidents,executive_summary,request_military_support,list_military_support,update_military_support,audit_log
-from integration import dependencies
+from integration import dependencies,introspect,send_neptune
 from storage import init_db
 SYSTEM_ID="UNG-NEMESIS"; LEGACY_ID="UNG-BCM"; VERSION="0.3.2"
 app=FastAPI(title=SYSTEM_ID,version=VERSION,description="National Emergency Management System")
